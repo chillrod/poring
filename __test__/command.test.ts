@@ -5,6 +5,7 @@ import FormData from "form-data";
 
 import readline from "../__mocks__/readline";
 import axios from "../__mocks__/axios";
+import terminal from "../__mocks__/terminalkit";
 
 interface TranslateForm extends HTMLFormElement {
   q: string;
@@ -13,38 +14,39 @@ interface TranslateForm extends HTMLFormElement {
   format: string;
 }
 
-describe("Command line test", () => {
+describe("Command line file", () => {
   const rl = readline.createInterface({
     input: stdin,
     output: stdout,
   });
 
-  const givenFile = (file) =>
-    rl.question(file, (data) => {
-      return data;
-    });
-
   const baseURL = "https://translate.argosopentech.com/translate";
 
-  const filePath = (file) => path.join(__dirname, file);
+  const getFile = (file) => {
+    const readfile = terminal.input(file, (data) => {
+      return fs.readFileSync(path.join(__dirname, data), "utf-8");
+    });
+
+    return readfile;
+  };
 
   it("should read a JS file of the directory based on the user input", async () => {
-    const file = fs.readFileSync(filePath(givenFile("test.json")), "utf-8");
+    const file = getFile("file.json");
 
     expect(file).toBeTruthy();
   });
 
   it("should parse the json structure and get the action bar key", () => {
-    const file = fs.readFileSync(filePath(givenFile("test.json")), "utf-8");
+    const file = getFile("file.json");
 
     const parsed = JSON.parse(file);
 
     expect(parsed["action-bar"]).toBe("Barra de ações");
   });
 
-  fit("should warn the user if no file is available on the directory", () => {
+  it("should warn the user if no file is available on the directory", () => {
     try {
-      const file = fs.readFileSync(filePath(givenFile("test.js")), "utf-8");
+      const file = getFile("file2.js");
 
       return file;
     } catch (err) {
@@ -53,8 +55,21 @@ describe("Command line test", () => {
     }
   });
 
+  it("should warn the user if the file exists but differs from the needed format", () => {
+    const file = getFile("file.js");
+
+    try {
+      const checkfile = path.extname(file);
+      file;
+      if (checkfile !== ".json")
+        throw new Error("The given file must be in JSON");
+    } catch (err) {
+      expect(err.message).toBe("The given file must be in JSON");
+    }
+  });
+
   it("should parse and translate a single key of the file", async () => {
-    const file = fs.readFileSync(filePath(givenFile("test.json")), "utf-8");
+    const file = getFile("file.json");
 
     const parsed = JSON.parse(file);
 
@@ -75,7 +90,7 @@ describe("Command line test", () => {
   });
 
   it("should assign the translated value to the same key", async () => {
-    const file = fs.readFileSync(filePath(givenFile("test.json")), "utf-8");
+    const file = getFile("file.json");
 
     const parsed = JSON.parse(file);
 
