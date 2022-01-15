@@ -1,9 +1,12 @@
+import { stdin, stdout } from "process";
 import path from "path";
-
 import fs from "fs";
+import FormData from "form-data";
 
 import readline from "../__mocks__/readline";
-import { stdin, stdout } from "process";
+import axios from "../__mocks__/axios";
+
+// const maxios = jest.mocked(axios, true);
 
 describe("Command line test", () => {
   const rl = readline.createInterface({
@@ -11,9 +14,11 @@ describe("Command line test", () => {
     output: stdout,
   });
 
-  const givenFile = rl.question("Whats the name of the file?", (data) => {
+  const givenFile = rl.question("", (data) => {
     return data;
   });
+
+  const baseURL = "https://libretranslate.de/translate";
 
   const filePath = (file) => path.join(__dirname, file);
 
@@ -32,13 +37,9 @@ describe("Command line test", () => {
   });
 
   it("should warn the user if the file is invalid", () => {
-    const wrongFormatFile = rl.wrongfile(
-      "Whats the name of the file",
-      (data) => {
-        return data;
-      }
-    );
-
+    const wrongFormatFile = rl.wrongfile("", (data) => {
+      return data;
+    });
 
     try {
       const checkfile = path.extname(wrongFormatFile);
@@ -46,14 +47,35 @@ describe("Command line test", () => {
       if (checkfile !== ".json")
         throw new Error("The given file must be in JSON");
     } catch (err) {
-      console.log("🚀 ~ file: command.test.ts ~ line 49 ~ it ~ err", err)
-      expect(err)
+      expect(err.message).toBe("The given file must be in JSON");
     }
   });
 
-  it.todo(
-    "should instruct the user that the file needed must be in json format"
-  );
+  fit("should parse and translate a single key of the file", async () => {
+    const file = fs.readFileSync(filePath(givenFile), "utf-8");
 
-  it.todo("should let the user select the base language to translate");
+    const parsed = JSON.parse(file);
+
+    interface TranslateForm extends HTMLFormElement {
+      q: string;
+      source: string;
+      target: string;
+      format: string;
+    }
+
+    const param: TranslateForm = <TranslateForm>{
+      q: parsed["action-bar"],
+      source: "pt",
+      target: "en",
+      format: "text",
+    };
+
+    const formData = new FormData(param);
+
+    await axios.post(baseURL, formData, (data) => {
+      const { translatedText } = data;
+
+      expect(translatedText).toBe("stock bar");
+    });
+  });
 });

@@ -1,3 +1,6 @@
 {
-  "action-bar": "Barra de ações"
+  "action-bar": "Barra de ações",
+  "actions": {
+    "new": "Adicionar"
+  }
 }
