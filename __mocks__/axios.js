@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export default module.exports = {
-  post: jest.fn().mockImplementationOnce(async (baseURL, params, get) => {
+  post: jest.fn().mockImplementation(async (baseURL, params, get) => {
     await axios
       .post(baseURL, "", {
         params,
