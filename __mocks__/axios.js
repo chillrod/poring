@@ -25,8 +25,10 @@ export default module.exports = {
 
     try {
       const fakeTranslate = rules[language];
-      
-      const res = fakeTranslate;
+
+      const res = await new Promise((resolve) =>
+        setTimeout(() => resolve(fakeTranslate), 2000)
+      );
 
       return get({ data: { translatedText: res } });
     } catch (err) {
