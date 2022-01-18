@@ -1,49 +1,10 @@
 import path from "path";
-import fs from "fs";
-import FormData from "form-data";
-
-import maxios from "../__mocks__/maxios";
 import terminal from "../__mocks__/terminalkit";
 
 import service from "../lib";
+import { ILanguages } from "../lib/dto";
 
 describe("Command line file", () => {
-  const getFile = (file) => {
-    const readfile = terminal.input(file, (data) => {
-      return fs.readFileSync(path.join(__dirname, data), "utf-8");
-    });
-
-    return readfile;
-  };
-
-  const _mapValues = async (
-    content: string[],
-    translate: ({ value, key }) => void
-  ) => {
-    const contentKeys = Object.keys(content);
-
-    const obj: any = {};
-
-    await Promise.all(
-      contentKeys.map(async (key) => {
-        const value = translate({ value: content[key], key });
-
-        return value;
-      })
-    ).then((values) => {
-      // maybe i can separate this function to another function? hm
-      values.forEach((value) => {
-        const key = value["key"];
-
-        const translatedValue = value["translatedText"];
-
-        obj[key] = translatedValue;
-      });
-    });
-
-    return JSON.stringify(obj);
-  };
-
   it("should read a JS file of the directory based on the user input", async () => {
     const file = service.getFile("file.json");
 
@@ -71,7 +32,9 @@ describe("Command line file", () => {
   it("should warn the user if the file exists but differs from the needed format", async () => {
     const file = await service.getFile("file.js");
 
-    expect(file).toEqual("error");
+    expect(file.message).toBe(
+      "No file exists in current directory or the file must be in json"
+    );
   });
 
   it("should parse the json structure and get the action bar key", async () => {
@@ -84,109 +47,65 @@ describe("Command line file", () => {
     const languages = Object.keys(service.languages);
 
     // selecting pt
-    const translate = await service.languagesToTranslate(
-      languages[1],
-      service.languages
-    );
+    await service.languagesToTranslate(languages[1], service.languages);
 
-    expect(translate).toEqual(["en", "zh", "es"]);
+    expect(service.remainingLanguages).toEqual(["en", "zh", "es"]);
   });
 
-  it("should parse and translate a single key of the file", async () => {
-    await service.getFile("file.json");
-
-    const pt = "pt";
-
-    const en = "en";
-
-    const translatedText = await service.translateFile({
-      source: pt,
-      target: en,
-    });
-
-    expect(translatedText).toBe("stock bar");
-  });
-
+  jest.setTimeout(15000);
   it("should translate and assign the translated value to the same key", async () => {
     await service.getFile("file.json");
 
-    const pt = "pt";
+    service.startLanguage = "pt";
 
-    const en = "en";
+    const supportedLanguages: ILanguages = service.languages;
 
-    const translateValues = await service.translateFile({
-      source: pt,
-      target: en,
+    const languages = service.languagesToTranslate(
+      service.startLanguage,
+      supportedLanguages // get only en
+    );
+
+    await service.configFileToTranslate(await languages);
+
+    const obj = {};
+    const target = {};
+
+    service.content.forEach((res) => {
+      obj[res.key] = res.translatedText;
+      target["language"] = res.language;
     });
 
-    // const translateValues = async ({ value, key }: any) => {
-    //   const shallowParam = {
-    //     ...param,
-    //     q: value,
-    //   };
+    const saveFile = await service.saveFile(target, obj);
 
-    //   const translate = await axios.mPost(
-    //     formData(shallowParam),
-    //     "es",
-    //     (data) => {
-    //       const {
-    //         data: { translatedText },
-    //       } = data;
-
-    //       return {
-    //         key,
-    //         translatedText,
-    //       };
-    //     }
-    //   );
-
-    //   return translate;
-    // };
-
-    // this function map, translate, and assign the translated values to the json object keys
-    // const translatedValues = await _mapValues(fileContent, translateValues);
-
-    // expect(translatedValues).toMatchSnapshot();
-
-    // expect(translatedValues).toContain("action-bar");
+    expect(saveFile.parseFile).toContain("action-bar");
   });
 
-  // it.skip("should translate and create the language file related to the given file", async () => {
-  //   const fileName = "file.json";
-  //   const language = "zh";
+  jest.setTimeout(15000);
 
-  //   const file = getFile(fileName);
+  it("should translate, assign to the same key and save the file ", async () => {
+    await service.getFile("file.json");
 
-  //   const fileContent = JSON.parse(file);
+    service.startLanguage = "pt";
 
-  //   const translateValues = async ({ value, key }: any) => {
-  //     const shallowParam = {
-  //       ...param,
-  //       q: value,
-  //     };
+    const supportedLanguages: ILanguages = service.languages;
 
-  //     const translate = await axios.mPost(
-  //       formData(shallowParam),
-  //       language,
-  //       (data) => {
-  //         const {
-  //           data: { translatedText },
-  //         } = data;
+    const languages = service.languagesToTranslate(
+      service.startLanguage,
+      supportedLanguages
+    );
 
-  //         return {
-  //           key,
-  //           translatedText,
-  //         };
-  //       }
-  //     );
+    await service.configFileToTranslate(await languages);
 
-  //     return translate;
-  //   };
+    const obj = {};
+    const target = {};
 
-  //   const translatedValues = await _mapValues(fileContent, translateValues);
+    service.content.forEach((res) => {
+      obj[res.key] = res.translatedText;
+      target["language"] = res.language;
+    });
 
-  //   fs.writeFileSync(`${__dirname}/${language}-${fileName}`, translatedValues);
+    await service.saveFile(target, obj);
 
-  //   expect(getFile(`${language}-${fileName}`)).toBeTruthy();
-  // });
+    expect(path.join(`${__dirname}/locales/es-locale.json`)).toBeTruthy();
+  });
 });

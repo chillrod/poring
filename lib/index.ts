@@ -1,13 +1,9 @@
 import { join, extname } from "path";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 
 import { terminal } from "terminal-kit";
-import { ILanguages } from "./dto";
+import { ILanguages, ITranslateFile } from "./dto";
 import axios from "axios";
-
-const cli = {
-  primary: terminal.blue(),
-};
 
 const appname = "kirby";
 
@@ -19,17 +15,25 @@ const service = {
     es: "es",
   },
 
+  loading: false,
+
+  content: [],
+
+  startLanguage: "",
+
+  remainingLanguages: [],
+
   fileContent: {},
 
   sendMessage(text: string) {
-    cli.primary(text);
+    terminal.blue(text);
   },
 
   exitCLI() {
     terminal.grabInput(false);
   },
 
-  getFile(file: string) {
+  async getFile(file: string) {
     try {
       if (extname(file) !== ".json") {
         throw new Error();
@@ -47,54 +51,139 @@ const service = {
         "\n\nNo file exists in current directory or the file must be in json"
       );
 
-      service.exitCLI();
+      service.sendMessage("\n\nPress y to start again");
 
-      return "error";
+      terminal.on("key", (name) => {
+        if (name === "y") {
+          service.execute();
+        }
+      });
+
+      return new Error(
+        "No file exists in current directory or the file must be in json"
+      );
     }
   },
 
-  async translateFile({ source, target }) {
-    try {
-      const {
-        data: { translatedText },
-      } = await axios.post(
-        "https://translate.argosopentech.com/translate",
-        "",
-        {
-          params: {
-            q: service.fileContent["action-bar"],
-            source,
-            target,
-          },
-        }
-      );
+  async configFileToTranslate(languages: string[]) {
+    const jsonKeys = Object.keys(service.fileContent);
 
-      return translatedText;
+    await Promise.all(
+      languages.map(async (language) => {
+        const keys = jsonKeys.map((key) => {
+          const configuration: ITranslateFile = {
+            language,
+            key,
+            value: service.fileContent[key],
+          };
+
+          return configuration;
+        });
+
+        await service.translateFile({
+          keys,
+        });
+
+        return keys;
+      })
+    );
+  },
+
+  async saveFile(target: { language?: string }, file: {}) {
+    const { language } = target;
+
+    const parseFile = JSON.stringify(file);
+
+    try {
+      writeFileSync(`${__dirname}/locales/${language}-locale.json`, parseFile);
+    } finally {
+      terminal.blue(`\n\n${language.toUpperCase()} File translated`);
+    }
+
+    return {
+      target,
+      parseFile,
+    };
+  },
+
+  async translateFile({ keys }) {
+    try {
+      await Promise.all(
+        keys.map(async (key) => {
+          const {
+            data: { translatedText },
+          } = await axios.post(
+            "https://translate.argosopentech.com/translate",
+            "",
+            {
+              params: {
+                q: key.value,
+                source: service.startLanguage,
+                target: key.language,
+              },
+            }
+          );
+
+          return {
+            translatedText,
+            key: key.key,
+            language: key.language,
+          };
+        })
+      ).then(async (res) => {
+        service.content = res;
+
+        const obj = {};
+        const target = {};
+
+        res.forEach((res) => {
+          obj[res.key] = res.translatedText;
+          target["language"] = res.language;
+        });
+
+        await service.saveFile(target, obj);
+
+        return res;
+      });
     } catch (err) {
-      // not tested yet
-      return err;
+      throw new Error(err);
     }
   },
 
   async languagesToTranslate(startLanguage: string, languages: ILanguages) {
+    terminal.blue("\n\n👽 Translating files...");
+
     const keys = Object.keys(languages);
 
-    const translateKeys = keys.filter((key) => {
-      if (key !== startLanguage) {
-        service.translateFile({ source: startLanguage, target: key });
-        return key;
-      }
-    });
+    const translateKeys = keys.filter((key) => key !== startLanguage);
+
+    service.remainingLanguages = translateKeys;
+
+    if (process.env.NODE_ENV !== "test") {
+      await service.configFileToTranslate(translateKeys);
+    }
 
     return translateKeys;
   },
 
-  async selectLanguage(languages: string[]) {
-    cli.primary("\n\nplease select the current language of the JSON file\n");
+  async selectLanguage(languages: ILanguages) {
+    const parseLanguages = Object.keys(languages);
+    terminal.blue("\n\nplease select the current language of the JSON file\n");
 
-    terminal.gridMenu(languages, async (err, res) => {
-      await service.languagesToTranslate(res.selectedText, service.languages);
+    terminal.gridMenu(parseLanguages, async (err, res) => {
+      service.startLanguage = res.selectedText;
+
+      await service.languagesToTranslate(
+        service.startLanguage,
+        service.languages
+      );
+
+      terminal.grabInput(false);
+
+      return res;
     });
+
+    return service.startLanguage;
   },
 
   async fileInput() {
@@ -106,17 +195,20 @@ const service = {
   async execute() {
     terminal.grabInput({});
 
-    cli.primary(`🐽 hey!\nwelcome to ${appname}.json\n`);
+    terminal.blue(`🐽 hey!\nwelcome to ${appname}.json\n`);
 
-    cli.primary(`\nplease provide the locale json file name\n`);
-
-    const languages = Object.keys(service.languages);
+    terminal.blue(`\nplease provide the locale json file name\n`);
 
     const input = await service.fileInput();
 
-    await service.getFile(input);
+    await service.getFile(input).then(async (res) => {
+      const invalidFileMessage =
+        "No file exists in current directory or the file must be in json";
 
-    await service.selectLanguage(languages);
+      if (res.message !== invalidFileMessage) {
+        await service.selectLanguage(service.languages);
+      }
+    });
   },
 };
 

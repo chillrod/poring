@@ -5,5 +5,8 @@
   "action-bar-actions-insert": "Inserir",
   "plans-card": "Planejamento de Colheita",
   "plans-card-view": "Visualizar",
+  "actions": {
+    "add": "adicionar"
+  },
   "plans-card-spread": "Elaborar"
 }
