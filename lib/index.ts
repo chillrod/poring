@@ -1,9 +1,10 @@
 import { join, extname } from "path";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, mkdir, writeFileSync } from "fs";
 
 import { terminal } from "terminal-kit";
 import { ILanguages, ITranslateFile } from "./dto";
 import axios from "axios";
+import path from "path/posix";
 
 const appname = "kirby";
 
@@ -39,9 +40,9 @@ const service = {
         throw new Error();
       }
 
-      const fileContent = JSON.parse(
-        readFileSync(join(__dirname, file), "utf-8")
-      );
+      const pathResolver = path.resolve(".");
+
+      const fileContent = JSON.parse(readFileSync(join(`./${file}`), "utf-8"));
 
       service.fileContent = fileContent;
 
@@ -95,9 +96,11 @@ const service = {
     const parseFile = JSON.stringify(file);
 
     try {
-      writeFileSync(`${__dirname}/locales/${language}-locale.json`, parseFile);
+      mkdir("./locales", { recursive: true }, () => {
+        writeFileSync(`./locales/${language}-locale.json`, parseFile);
+      });
     } finally {
-      terminal.blue(`\n\n${language.toUpperCase()} File translated`);
+      terminal.blue(`\n\n${language?.toUpperCase()} File translated`);
     }
 
     return {

@@ -1,17 +1,19 @@
 {
   "name": "if-localizer",
-  "version": "0.0.1",
+  "version": "0.0.4",
+  "bin": {
+    "if-localizer": "./build/lib/index.js"
+  },
   "description": "library to parse and translate locale files",
-  "main": "index.js",
+  "main": "lib/index.ts",
   "scripts": {
     "dev": "ts-node-dev --inspect --transpile-only  --ignore-watch node_modules  --respawn lib/*.ts",
     "test:watch": "jest --watchAll"
   },
   "author": "chillrod",
-  "license": "MIT",
+  "license": "beto",
   "dependencies": {
     "axios": "^0.24.0",
-    "form-data": "^4.0.0",
     "terminal-kit": "^2.3.0"
   },
   "devDependencies": {
