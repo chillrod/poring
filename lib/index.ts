@@ -1,12 +1,14 @@
+#!/usr/bin/env node
+
 import { join, extname } from "path";
 import { readFileSync, mkdir, writeFileSync } from "fs";
 
 import { terminal } from "terminal-kit";
 import { ILanguages, ITranslateFile } from "./dto";
-import axios from "axios";
-import path from "path/posix";
 
-const appname = "kirby";
+import axios from "axios";
+
+const appname = "poring";
 
 const service = {
   languages: {
@@ -40,9 +42,9 @@ const service = {
         throw new Error();
       }
 
-      const pathResolver = path.resolve(".");
-
-      const fileContent = JSON.parse(readFileSync(join(`./${file}`), "utf-8"));
+      const fileContent = JSON.parse(
+        readFileSync(join(`${(process.cwd(), file)}`), "utf-8")
+      );
 
       service.fileContent = fileContent;
 
@@ -97,7 +99,10 @@ const service = {
 
     try {
       mkdir("./locales", { recursive: true }, () => {
-        writeFileSync(`./locales/${language}-locale.json`, parseFile);
+        writeFileSync(
+          `${process.cwd()}/locales/${language}-locale.json`,
+          parseFile
+        );
       });
     } finally {
       terminal.blue(`\n\n${language?.toUpperCase()} File translated`);

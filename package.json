@@ -1,11 +1,11 @@
 {
-  "name": "if-localizer",
-  "version": "0.0.4",
+  "name": "poring",
+  "version": "0.0.1",
   "bin": {
-    "if-localizer": "./build/lib/index.js"
+    "poring": ".lib/index.js"
   },
   "description": "library to parse and translate locale files",
-  "main": "lib/index.ts",
+  "main": "./index.ts",
   "scripts": {
     "dev": "ts-node-dev --inspect --transpile-only  --ignore-watch node_modules  --respawn lib/*.ts",
     "test:watch": "jest --watchAll"
