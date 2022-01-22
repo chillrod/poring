@@ -7,6 +7,6 @@ export interface ILanguages {
 
 export interface ITranslateFile {
   language: string;
-  key: string;
+  content: string;
   value: string;
 }
