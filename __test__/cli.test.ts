@@ -54,8 +54,8 @@ describe("Command line file", () => {
     expect(locale.state.targetLanguages).toEqual(["en"]);
   });
 
-  jest.setTimeout(15000);
-  it("should translate and assign the translated value to the same key", async () => {
+  jest.setTimeout(10000);
+  fit("should configure the file to be translated", async () => {
     await fileService.getFile("file.json");
 
     locale.state.sourceLanguage = "pt";
@@ -63,6 +63,26 @@ describe("Command line file", () => {
     await locale.languagesToTranslate(supportedLanguages);
 
     await translate.configureLanguages(fileService.state.content);
+
+    expect(translate.state.obj).toHaveProperty("action-bar");
+  });
+
+  fit("should know if the json is nested and remap all keys", async () => {
+    await fileService.getFile("file.json");
+
+    const nested = Object.keys(fileService.state.content).map((content) => {
+      return {
+        key: content,
+        value: fileService.state.content[content],
+        language: "pt",
+      };
+    });
+
+    console.log(translate.parseJSON({ keys: nested }));
+
+    // expect(translate.parseJSON({ keys: nested })).toHaveBeenCalledWith(
+    //   translate.parseNestedJSON
+    // );
   });
 
   // jest.setTimeout(15000);

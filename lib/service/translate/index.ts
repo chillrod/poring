@@ -5,7 +5,7 @@ import locale from "../locale";
 
 const translate = {
   state: {
-    translateContent: {},
+    obj: {},
   },
   async configureLanguages(content) {
     const fileContent = Object.keys(content);
@@ -19,26 +19,68 @@ const translate = {
         };
       });
 
-      await translate.libreService({ keys });
+      await translate.parseJSON({ keys });
     }
   },
 
-  async libreService({ keys }) {
+  async parseJSON({ keys }) {
     for (const key of keys) {
-      const {
-        data: { translatedText },
-      } = await axios
-        .post("https://translate.argosopentech.com/translate", "", {
-          params: {
-            q: key.value,
-            source: locale.state.sourceLanguage,
-            target: key.language,
-          },
-        })
-        .catch(() => {
-          throw new Error("Failed to translate");
-        });
+      if (typeof key.value !== "object") {
+        await translate.libreService(key);
+      }
+
+      if (typeof key.value === "object") {
+        translate.parseNestedJSON(key);
+      }
     }
+  },
+
+  parseNestedJSON(key) {
+    if (!translate.state.obj[key.key]) translate.state.obj[key.key] = {};
+
+    const asyncKeys = Object.keys(key.value);
+
+    const nestedKeys = asyncKeys.map((newKey) => {
+      return {
+        higherKey: key.key,
+        key: newKey,
+        value: key.value[newKey],
+        language: key.language,
+      };
+    });
+
+    translate.parseJSON({ keys: nestedKeys });
+  },
+
+  async libreService(key) {
+    await axios
+      .post("https://translate.argosopentech.com/translate", "", {
+        params: {
+          q: key.value,
+          source: locale.state.sourceLanguage,
+          target: key.language,
+        },
+      })
+      .then((res) => {
+        const {
+          data: { translatedText },
+        } = res;
+
+        if (key.higherKey) {
+          return (translate.state.obj[key.higherKey][key.key] = translatedText);
+        }
+
+        translate.state.obj[key.key] = translatedText;
+
+        return {
+          key: key.key,
+          value: translatedText,
+          language: key.language,
+        };
+      })
+      .catch((err) => {
+        throw new Error("Failed to translate");
+      });
   },
 };
 

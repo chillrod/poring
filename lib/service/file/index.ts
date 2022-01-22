@@ -10,6 +10,7 @@ import service from "../..";
 const fileService = {
   state: {
     content: {},
+    translatedContent: {},
   },
 
   async getFile(file: string) {
