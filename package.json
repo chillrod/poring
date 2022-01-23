@@ -1,11 +1,11 @@
 {
   "name": "poring",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "bin": {
     "poring": "index.js"
   },
   "description": "Translate JSON values with the opensource Library Libre Translate",
-  "main": "./index.ts",
+  "main": "index.js",
   "homepage": "https://github.com/chillrod/poring/",
   "repository": "https://github.com/chillrod/poring.git",
   "scripts": {
