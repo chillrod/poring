@@ -1,6 +1,6 @@
 {
   "name": "poring",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "bin": {
     "poring": ".lib/index.js"
   },
@@ -12,6 +12,14 @@
     "dev": "ts-node-dev --inspect --transpile-only  --ignore-watch node_modules  --respawn lib/*.ts",
     "test:watch": "jest --watchAll"
   },
+  "keywords": [
+    "Libre Translate",
+    "translate json",
+    "json",
+    "nested json translate",
+    "translate locale",
+    "poring"
+  ],
   "author": "chillrod",
   "license": "BETO",
   "dependencies": {

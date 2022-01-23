@@ -1,29 +1,24 @@
 # 🐽 Hi poring
 
-Poring is a library that parse and translate JSON files using the open source api LibreTranslate
+``
+version: 0.1.0
+``
+
+#### Poring is a library that parse and translate JSON files using the open source api LibreTranslate
+
+
+contribute: 
+[github](https://github.com/chillrod/poring)
 
 ## How
 
 We currently use the format of a CLI
 
-Our steps are
-
-Ask for the file and the language provided on the file, then we read and parse the json.
-
-After that, we collect the remaining languages supported.
-
 The start language provided serves as a "source" language to make requests to
 [LibreTranslate](https://github.com/LibreTranslate/LibreTranslate) services...
 
-Then after the JSON keys are translated, we save the file in a new folder on the directory that the script was initiated.
+![myfile](https://github.com/chillrod/poring/blob/main/content/poring.gif?raw=true)
 
-The prefix of the file is - the target language and the same given file name.
-
-Ex:
-
-```bash
-/locales/en-file.json
-```
 
 ## Why
 
@@ -64,5 +59,25 @@ Then just run
 Simple as that.
 
 #### License
+
+
+### Changelogs
+v 0.1.0
+----
+```
+Added nested JSON translate
+Defined user feedback
+Refactory in async iteration
+90%+ Coverage
+```
+
+v 0.0.6
+----
+```
+Lib started
+Translating non nesting JSONS (need fix)
+```
+
+
 
 beto/opensource
