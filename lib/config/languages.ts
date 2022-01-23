@@ -11,6 +11,7 @@ const supportedLanguages = {
 const testLanguages = {
   en: "en-us",
   pt: "pt-br",
+  zh: "zh-cn",
 };
 
 const checkNodeEnv = process.env.NODE_ENV === "test";

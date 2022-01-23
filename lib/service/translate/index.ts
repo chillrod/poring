@@ -3,56 +3,61 @@ import axios from "axios";
 import fileService from "../file";
 import locale from "../locale";
 
+import { flatten, unflatten } from "flat";
+import { emitMessage, randomTranslatedMessage } from "../../events/messages";
+import { terminal } from "terminal-kit";
+
 const translate = {
   state: {
-    obj: {},
+    flatten: {},
+    translatedContent: {},
+    shallowFlatten: {},
   },
-  async configureLanguages(content) {
-    const fileContent = Object.keys(content);
+  flattenFile(file) {
+    return flatten(file);
+  },
+  unflattenFile(file) {
+    return unflatten(file);
+  },
+  async prepareObjectToTranslate(file) {
+    const flattened = translate.flattenFile(file);
+
+    translate.state.flatten = flattened;
 
     for (const language of locale.state.targetLanguages) {
-      const keys = fileContent.map((key) => {
-        return {
-          key,
-          value: fileService.state.content[key],
-          language,
-        };
+      const lastItem = locale.state.targetLanguages.slice(-1);
+
+      await translate.keyTranslate(language).then(() => {
+        randomTranslatedMessage(language);
+
+        if (lastItem[0] === language) {
+          emitMessage(`\n\n🌈  Thank you!\n`);
+
+          terminal.on("key", (name) => {
+            if (name === "CTRL_C") {
+              terminal.grabInput(false);
+            }
+          });
+        }
+
+        fileService.saveFile(language, translate.state.translatedContent);
       });
-
-      await translate.parseJSON({ keys });
     }
   },
 
-  async parseJSON({ keys }) {
-    for (const key of keys) {
-      if (typeof key.value !== "object") {
-        await translate.libreService(key);
-      }
+  async keyTranslate(language) {
+    const configuration = Object.keys(translate.state.flatten);
 
-      if (typeof key.value === "object") {
-        translate.parseNestedJSON(key);
-      }
+    for (const key of configuration) {
+      await translate.execute({
+        key,
+        value: translate.state.flatten[key],
+        language,
+      });
     }
   },
 
-  parseNestedJSON(key) {
-    if (!translate.state.obj[key.key]) translate.state.obj[key.key] = {};
-
-    const asyncKeys = Object.keys(key.value);
-
-    const nestedKeys = asyncKeys.map((newKey) => {
-      return {
-        higherKey: key.key,
-        key: newKey,
-        value: key.value[newKey],
-        language: key.language,
-      };
-    });
-
-    translate.parseJSON({ keys: nestedKeys });
-  },
-
-  async libreService(key) {
+  async execute(key) {
     await axios
       .post("https://translate.argosopentech.com/translate", "", {
         params: {
@@ -66,20 +71,10 @@ const translate = {
           data: { translatedText },
         } = res;
 
-        if (key.higherKey) {
-          return (translate.state.obj[key.higherKey][key.key] = translatedText);
-        }
-
-        translate.state.obj[key.key] = translatedText;
-
-        return {
-          key: key.key,
-          value: translatedText,
-          language: key.language,
-        };
+        return (translate.state.translatedContent[key.key] = translatedText);
       })
       .catch((err) => {
-        throw new Error("Failed to translate");
+        return err;
       });
   },
 };
