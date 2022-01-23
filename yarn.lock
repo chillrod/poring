@@ -1233,7 +1233,7 @@
 
 "@types/flat@^5.0.2":
   version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@types/flat/-/flat-5.0.2.tgz#642a51a037d1f52fda082312b0e4566dc09a9f8f"
+  resolved "https://registry.npmjs.org/@types/flat/-/flat-5.0.2.tgz"
   integrity sha512-3zsplnP2djeps5P9OyarTxwRpMLoe5Ash8aL9iprw0JxB+FAHjY+ifn4yZUuW4/9hqtnmor6uvjSRzJhiVbrEQ==
 
 "@types/graceful-fs@^4.1.2":
@@ -2371,7 +2371,7 @@ flat-cache@^3.0.4:
 
 flat@^5.0.2:
   version "5.0.2"
-  resolved "https://registry.yarnpkg.com/flat/-/flat-5.0.2.tgz#8ca6fe332069ffa9d324c327198c598259ceb241"
+  resolved "https://registry.npmjs.org/flat/-/flat-5.0.2.tgz"
   integrity sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==
 
 flatted@^3.1.0:
@@ -2412,6 +2412,11 @@ functional-red-black-tree@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
+
+g@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/g/-/g-2.0.1.tgz"
+  integrity sha1-C1lj69DKcOO8jGdmk0oCGCHIuFc=
 
 gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"

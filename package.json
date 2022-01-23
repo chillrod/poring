@@ -1,8 +1,8 @@
 {
   "name": "poring",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "bin": {
-    "poring": ".lib/index.js"
+    "poring": "index.js"
   },
   "description": "Translate JSON values with the opensource Library Libre Translate",
   "main": "./index.ts",
@@ -25,6 +25,7 @@
   "dependencies": {
     "axios": "^0.24.0",
     "flat": "^5.0.2",
+    "g": "^2.0.1",
     "terminal-kit": "^2.3.0"
   },
   "devDependencies": {
