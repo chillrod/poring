@@ -1,13 +1,10 @@
 # 🐽 Hi poring
 
-``
-version: 0.1.0
-``
+`version: 0.1.3`
 
 #### Poring is a library that parse and translate JSON files using the open source api LibreTranslate
 
-
-contribute: 
+contribute:
 [github](https://github.com/chillrod/poring)
 
 ## How
@@ -18,7 +15,6 @@ The start language provided serves as a "source" language to make requests to
 [LibreTranslate](https://github.com/LibreTranslate/LibreTranslate) services...
 
 ![myfile](https://github.com/chillrod/poring/blob/main/content/poring.gif?raw=true)
-
 
 ## Why
 
@@ -60,10 +56,10 @@ Simple as that.
 
 #### License
 
-
 ### Changelogs
-v 0.1.0
-----
+
+## v 0.1.0
+
 ```
 Added nested JSON translate
 Defined user feedback
@@ -71,13 +67,19 @@ Refactory in async iteration
 90%+ Coverage
 ```
 
-v 0.0.6
-----
+## v 0.0.6
+
 ```
 Lib started
 Translating non nesting JSONS (need fix)
 ```
 
+### Roadmap
 
+```
+Add support to more languages
+Add support to flag commands ex: poring --file.json
+Add support to JS objects
+```
 
 beto/opensource
