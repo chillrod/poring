@@ -8,15 +8,16 @@ We currently use the format of a CLI
 
 Our steps are
 
-Ask for the file and the language provided on the file,
-then we read and parse the JSON and collect the remaining languages supported.
+Ask for the file and the language provided on the file, then we read and parse the json.
+
+After that, we collect the remaining languages supported.
 
 The start language provided serves as a "source" language to make requests to
 [LibreTranslate](https://github.com/LibreTranslate/LibreTranslate) services...
 
 Then after the JSON keys are translated, we save the file in a new folder on the directory that the script was initiated.
 
-The prefix of the fale are the target language and the same given file name.
+The prefix of the file is - the target language and the same given file name.
 
 Ex:
 
